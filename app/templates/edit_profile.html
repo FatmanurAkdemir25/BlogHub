@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Profili Düzenle - BlogHub{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="form-container">
+        <div class="form-header">
+            <h1><i class="fas fa-user-edit"></i> Profili Düzenle</h1>
+            <p>Profil bilgilerinizi güncelleyin</p>
+        </div>
+
+        <form action="{{ url_for('user.edit_profile', username=user.username) }}" method="POST" enctype="multipart/form-data" class="post-form">
+            
+            <div class="current-profile-info">
+                <div class="current-avatar-section">
+                    <label>Mevcut Profil Fotoğrafı:</label>
+                    <div class="current-avatar-display">
+                        {% if user.avatar and user.avatar != 'default-avatar.jpg' %}
+                            <img src="{{ url_for('static', filename='uploads/' + user.avatar) }}" alt="{{ user.username }}">
+                        {% else %}
+                            <div class="default-avatar-large">
+                                <i class="fas fa-user-circle"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="avatar"><i class="fas fa-camera"></i> Yeni Profil Fotoğrafı</label>
+                <div class="file-upload-wrapper">
+                    <input type="file" id="avatar" name="avatar" accept="image/*" onchange="previewAvatar(event)">
+                    <div class="file-upload-label">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <span>Profil fotoğrafı yüklemek için tıklayın</span>
+                        <small>JPG, PNG, GIF (Maks. 5MB)</small>
+                    </div>
+                </div>
+                <div id="avatarPreview" class="image-preview"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="bio"><i class="fas fa-pen"></i> Biyografi</label>
+                <textarea id="bio" name="bio" rows="6" placeholder="Kendinizden bahsedin...">{{ user.bio or '' }}</textarea>
+                <small class="form-text">Okuyucularınıza kendinizi tanıtın</small>
+            </div>
+
+            <div class="profile-stats-info">
+                <div class="stat-info-item">
+                    <i class="fas fa-envelope"></i>
+                    <span>{{ user.email }}</span>
+                </div>
+                <div class="stat-info-item">
+                    <i class="fas fa-calendar"></i>
+                    <span>Üyelik: {{ user.created_at.strftime('%d %B %Y') }}</span>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-save"></i> Değişiklikleri Kaydet
+                </button>
+                <a href="{{ url_for('user.profile', username=user.username) }}" class="btn btn-secondary btn-lg">
+                    <i class="fas fa-times"></i> İptal
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function previewAvatar(event) {
+    const preview = document.getElementById('avatarPreview');
+    const file = event.target.files[0];
+    
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.innerHTML = `
+                <div class="avatar-preview-container">
+                    <p><strong>Yeni fotoğraf önizleme:</strong></p>
+                    <img src="${e.target.result}" alt="Preview" class="avatar-preview-img">
+                </div>
+            `;
+            preview.style.display = 'block';
+        }
+        reader.readAsDataURL(file);
+    }
+}
+</script>
+{% endblock %}

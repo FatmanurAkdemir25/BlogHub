@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Yazıyı Düzenle - BlogHub{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="form-container">
+        <div class="form-header">
+            <h1><i class="fas fa-edit"></i> Yazıyı Düzenle</h1>
+            <p>Yazınızı güncelleyin</p>
+        </div>
+
+        <form action="{{ url_for('posts.edit', id=post.id) }}" method="POST" enctype="multipart/form-data" class="post-form">
+            <div class="form-group">
+                <label for="title"><i class="fas fa-heading"></i> Başlık</label>
+                <input type="text" id="title" name="title" value="{{ post.title }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="category"><i class="fas fa-tag"></i> Kategori</label>
+                <select id="category" name="category" required>
+                    <option value="">Kategori Seçin</option>
+                    <option value="Teknoloji" {% if post.category == 'Teknoloji' %}selected{% endif %}>Teknoloji</option>
+                    <option value="Yaşam" {% if post.category == 'Yaşam' %}selected{% endif %}>Yaşam</option>
+                    <option value="Seyahat" {% if post.category == 'Seyahat' %}selected{% endif %}>Seyahat</option>
+                    <option value="Yemek" {% if post.category == 'Yemek' %}selected{% endif %}>Yemek</option>
+                    <option value="Spor" {% if post.category == 'Spor' %}selected{% endif %}>Spor</option>
+                    <option value="Sanat" {% if post.category == 'Sanat' %}selected{% endif %}>Sanat</option>
+                    <option value="Eğitim" {% if post.category == 'Eğitim' %}selected{% endif %}>Eğitim</option>
+                    <option value="İş" {% if post.category == 'İş' %}selected{% endif %}>İş</option>
+                    <option value="Kişisel Gelişim" {% if post.category == 'Kişisel Gelişim' %}selected{% endif %}>Kişisel Gelişim</option>
+                    <option value="Diğer" {% if post.category == 'Diğer' %}selected{% endif %}>Diğer</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="summary"><i class="fas fa-align-left"></i> Özet</label>
+                <textarea id="summary" name="summary" rows="3" maxlength="300">{{ post.summary }}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="image"><i class="fas fa-image"></i> Kapak Görseli</label>
+                {% if post.image %}
+                    <div class="current-image">
+                        <p>Mevcut görsel:</p>
+                        <img src="{{ url_for('static', filename='uploads/' + post.image) }}" alt="{{ post.title }}">
+                    </div>
+                {% endif %}
+                <div class="file-upload-wrapper">
+                    <input type="file" id="image" name="image" accept="image/*" onchange="previewImage(event)">
+                    <div class="file-upload-label">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <span>Yeni görsel yükle (isteğe bağlı)</span>
+                    </div>
+                </div>
+                <div id="imagePreview" class="image-preview"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="content"><i class="fas fa-file-alt"></i> İçerik</label>
+                <textarea id="content" name="content" rows="15" required>{{ post.content }}</textarea>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-save"></i> Değişiklikleri Kaydet
+                </button>
+                <a href="{{ url_for('posts.detail', id=post.id) }}" class="btn btn-secondary btn-lg">
+                    <i class="fas fa-times"></i> İptal
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function previewImage(event) {
+    const preview = document.getElementById('imagePreview');
+    const file = event.target.files[0];
+    
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+            preview.style.display = 'block';
+        }
+        reader.readAsDataURL(file);
+    }
+}
+</script>
+{% endblock %}

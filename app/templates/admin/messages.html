@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Gelen Mesajlar - Admin{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="admin-header">
+        <div>
+            <h1><i class="fas fa-envelope"></i> Gelen Mesajlar</h1>
+            {% if unread_count > 0 %}
+                <span class="message-count-badge">{{ unread_count }} okunmamış mesaj</span>
+            {% endif %}
+        </div>
+        <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Admin Panele Dön
+        </a>
+    </div>
+
+    <div class="messages-container">
+        {% for message in messages %}
+            <div class="message-card {% if message.status == 'pending' %}unread{% endif %}">
+                <div class="message-header">
+                    <div class="message-card-avatar">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="message-sender">
+                        <strong>{{ message.name }}</strong>
+                        <span class="message-email">{{ message.email }}</span>
+                    </div>
+                    <div class="message-status">
+                        {% if message.status == 'pending' %}
+                            <span class="badge pending-badge"><i class="fas fa-clock"></i> Bekliyor</span>
+                        {% elif message.status == 'read' %}
+                            <span class="badge read-badge"><i class="fas fa-eye"></i> Okundu</span>
+                        {% elif message.status == 'replied' %}
+                            <span class="badge replied-badge"><i class="fas fa-check"></i> Cevaplandı</span>
+                        {% endif %}
+                        <span class="message-date">{{ message.created_at.strftime('%d.%m.%Y %H:%M') }}</span>
+                    </div>
+                </div>
+                
+                <div class="message-subject">
+                    <span class="subject-label">{{ message.subject }}</span>
+                </div>
+                
+                <div class="message-preview">
+                    {{ message.message[:150] }}{{ '...' if message.message|length > 150 }}
+                </div>
+                
+                <div class="message-actions">
+                    <a href="{{ url_for('admin.admin_message_detail', id=message.id) }}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-eye"></i> Görüntüle ve Cevapla
+                    </a>
+                    <form action="{{ url_for('admin.admin_delete_message', id=message.id) }}" method="POST" style="display: inline;">
+                        <button type="submit" class="btn btn-danger btn-sm" 
+                                onclick="return confirm('Bu mesajı silmek istediğinize emin misiniz?')">
+                            <i class="fas fa-trash"></i> Sil
+                        </button>
+                    </form>
+                </div>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <h2>Henüz Mesaj Yok</h2>
+                <p>Kullanıcılardan gelen mesajlar burada görünecek.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

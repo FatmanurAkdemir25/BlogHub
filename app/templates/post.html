@@ -1,0 +1,357 @@
+{% extends "base.html" %}
+
+{% block title %}{{ post.title }} - BlogHub{% endblock %}
+
+{% block content %}
+<div class="post-detail-hero">
+    {% if post.image %}
+        <img src="{{ url_for('static', filename='uploads/' + post.image) }}" alt="{{ post.title }}">
+    {% endif %}
+    <div class="post-detail-overlay">
+        <div class="container">
+            <div class="post-detail-header">
+                <span class="post-category-badge">
+                    <i class="fas fa-tag"></i> {{ post.category or 'Genel' }}
+                </span>
+                <h1 class="post-detail-title">{{ post.title }}</h1>
+                <div class="post-detail-meta">
+                    <span><i class="fas fa-user"></i> {{ post.author.username }}</span>
+                    <span><i class="far fa-calendar"></i> {{ post.created_at.strftime('%d %B %Y') }}</span>
+                    <span><i class="fas fa-eye"></i> {{ post.views }} görüntülenme</span>
+                    <span><i class="fas fa-comment"></i> {{ post.comments|length }} yorum</span>
+                    <span><i class="fas fa-heart"></i> <span id="likes-count">{{ post.get_likes_count() }}</span> beğeni</span>
+                    <span><i class="fas fa-clock"></i> {{ post.reading_time() }} dk okuma</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="post-detail-wrapper">
+        <article class="post-detail-content">
+            <div class="post-content-body">
+                {{ post.content|markdown|safe }}
+            </div>
+
+            <div class="post-engagement">
+                {% if current_user.is_authenticated %}
+                    <div class="engagement-buttons">
+                        <button onclick="toggleLike({{ post.id }})" id="like-btn" class="btn-like {% if post.is_liked_by(current_user) %}liked{% endif %}">
+                            <i class="fas fa-heart"></i>
+                            <span id="like-text">{{ 'Beğenildi' if post.is_liked_by(current_user) else 'Beğen' }}</span>
+                            (<span id="like-count">{{ post.get_likes_count() }}</span>)
+                        </button>
+                        
+                        <button onclick="toggleBookmark({{ post.id }})" id="bookmark-btn" class="btn-bookmark {% if post.is_bookmarked_by(current_user) %}bookmarked{% endif %}">
+                            <i class="fas fa-bookmark"></i>
+                            <span id="bookmark-text">{{ 'Kaydedildi' if post.is_bookmarked_by(current_user) else 'Kaydet' }}</span>
+                        </button>
+                    </div>
+                {% else %}
+                    <a href="{{ url_for('auth.login') }}" class="btn-like">
+                        <i class="fas fa-heart"></i> Beğenmek için giriş yapın ({{ post.get_likes_count() }})
+                    </a>
+                {% endif %}
+                
+                <div class="post-share-inline">
+                    <span><i class="fas fa-share-alt"></i> Paylaş:</span>
+                    <a href="https://twitter.com/intent/tweet?url={{ request.url }}&text={{ post.title }}" target="_blank" class="share-icon twitter">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.url }}" target="_blank" class="share-icon facebook">
+                        <i class="fab fa-facebook"></i>
+                    </a>
+                    <a href="https://wa.me/?text={{ post.title }} {{ request.url }}" target="_blank" class="share-icon whatsapp">
+                        <i class="fab fa-whatsapp"></i>
+                    </a>
+                </div>
+            </div>
+
+            {% if current_user.is_authenticated and current_user.id == post.user_id %}
+                <div class="post-actions">
+                    <a href="{{ url_for('posts.edit', id=post.id) }}" class="btn btn-secondary">
+                        <i class="fas fa-edit"></i> Düzenle
+                    </a>
+                    <form action="{{ url_for('posts.delete', id=post.id) }}" method="POST" style="display: inline;" 
+                          onsubmit="return confirm('Bu yazıyı silmek istediğinize emin misiniz?');">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Sil
+                        </button>
+                    </form>
+                </div>
+            {% endif %}
+
+            <div class="post-author-box">
+                <div class="author-avatar">
+                    {% if post.author.avatar and post.author.avatar != 'default-avatar.jpg' %}
+                        <img src="{{ url_for('static', filename='uploads/' + post.author.avatar) }}" alt="{{ post.author.username }}" class="author-avatar-img">
+                    {% else %}
+                        <i class="fas fa-user-circle"></i>
+                    {% endif %}
+                </div>
+                <div class="author-info">
+                    <h4>Yazar Hakkında</h4>
+                    <h3>{{ post.author.username }}</h3>
+                    <p>{{ post.author.bio or 'Henüz biyografi eklenmemiş.' }}</p>
+                    <a href="{{ url_for('user.profile', username=post.author.username) }}" class="btn btn-sm">
+                        Profili Görüntüle
+                    </a>
+                </div>
+            </div>
+
+            <div class="comments-section">
+                <h2 class="section-title">
+                    <i class="fas fa-comments"></i> Yorumlar ({{ comments|length }})
+                </h2>
+
+                {% if current_user.is_authenticated %}
+                    <form action="{{ url_for('posts.add_comment', id=post.id) }}" method="POST" class="comment-form">
+                        <textarea name="content" placeholder="Yorumunuzu yazın..." required></textarea>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i> Yorum Yap
+                        </button>
+                    </form>
+                {% else %}
+                    <div class="login-prompt">
+                        <p><i class="fas fa-info-circle"></i> Yorum yapmak için <a href="{{ url_for('auth.login') }}">giriş yapın</a></p>
+                    </div>
+                {% endif %}
+
+                <div class="comments-list">
+                    {% for comment in comments %}
+                        {% if not comment.parent_id %}
+                            <div class="comment-item" id="comment-{{ comment.id }}">
+                                <div class="comment-avatar">
+                                    {% if comment.author.avatar and comment.author.avatar != 'default-avatar.jpg' %}
+                                        <img src="{{ url_for('static', filename='uploads/' + comment.author.avatar) }}" alt="{{ comment.author.username }}" class="comment-avatar-img">
+                                    {% else %}
+                                        <i class="fas fa-user-circle"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="comment-content">
+                                    <div class="comment-header">
+                                        <strong>{{ comment.author.username }}</strong>
+                                        <span class="comment-date">{{ comment.created_at.strftime('%d.%m.%Y %H:%M') }}</span>
+                                    </div>
+                                    <p>{{ comment.content }}</p>
+                                    <div class="comment-actions">
+                                        {% if current_user.is_authenticated %}
+                                            <button onclick="toggleReplyForm({{ comment.id }})" class="btn-reply">
+                                                <i class="fas fa-reply"></i> Cevapla
+                                            </button>
+                                        {% endif %}
+                                        {% if current_user.is_authenticated and (current_user.id == post.user_id or current_user.is_admin) %}
+                                            <form action="{{ url_for('posts.delete_comment', id=comment.id) }}" method="POST" style="display: inline;">
+                                                <button type="submit" class="btn-delete-comment" 
+                                                        onclick="return confirm('Bu yorumu silmek istediğinize emin misiniz?')">
+                                                    <i class="fas fa-trash"></i> Sil
+                                                </button>
+                                            </form>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div id="reply-form-{{ comment.id }}" class="reply-form" style="display: none;">
+                                        <form action="{{ url_for('posts.add_comment', id=post.id) }}" method="POST">
+                                            <input type="hidden" name="parent_id" value="{{ comment.id }}">
+                                            <textarea name="content" placeholder="Cevabınızı yazın..." required></textarea>
+                                            <div class="reply-form-actions">
+                                                <button type="submit" class="btn btn-primary btn-sm">
+                                                    <i class="fas fa-paper-plane"></i> Cevapla
+                                                </button>
+                                                <button type="button" onclick="toggleReplyForm({{ comment.id }})" class="btn btn-secondary btn-sm">
+                                                    İptal
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    
+                                    <!-- Alt yorumlar -->
+                                    {% if comment.replies.count() > 0 %}
+                                        <div class="replies">
+                                            {% for reply in comment.replies %}
+                                                <div class="comment-item reply-item">
+                                                    <div class="comment-avatar">
+                                                        {% if reply.author.avatar and reply.author.avatar != 'default-avatar.jpg' %}
+                                                            <img src="{{ url_for('static', filename='uploads/' + reply.author.avatar) }}" alt="{{ reply.author.username }}" class="comment-avatar-img">
+                                                        {% else %}
+                                                            <i class="fas fa-user-circle"></i>
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="comment-content">
+                                                        <div class="comment-header">
+                                                            <strong>{{ reply.author.username }}</strong>
+                                                            <span class="comment-date">{{ reply.created_at.strftime('%d.%m.%Y %H:%M') }}</span>
+                                                        </div>
+                                                        <p>{{ reply.content }}</p>
+                                                        {% if current_user.is_authenticated and (current_user.id == post.user_id or current_user.is_admin) %}
+                                                            <form action="{{ url_for('posts.delete_comment', id=reply.id) }}" method="POST" style="display: inline;">
+                                                                <button type="submit" class="btn-delete-comment" 
+                                                                        onclick="return confirm('Bu yorumu silmek istediğinize emin misiniz?')">
+                                                                    <i class="fas fa-trash"></i> Sil
+                                                                </button>
+                                                            </form>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="no-comments">
+                            <i class="fas fa-comment-slash"></i>
+                            <p>Henüz yorum yapılmamış. İlk yorumu siz yapın!</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </article>
+
+        <aside class="post-sidebar">
+            {% if related_posts %}
+                <div class="sidebar-widget">
+                    <h3 class="widget-title"><i class="fas fa-newspaper"></i> İlgili Yazılar</h3>
+                    <div class="related-posts">
+                        {% for related in related_posts %}
+                            <div class="related-post-item">
+                                {% if related.image %}
+                                    <img src="{{ url_for('static', filename='uploads/' + related.image) }}" alt="{{ related.title }}">
+                                {% else %}
+                                    <div class="related-post-no-image"><i class="fas fa-file-alt"></i></div>
+                                {% endif %}
+                                <div class="related-post-info">
+                                    <a href="{{ url_for('posts.detail', id=related.id) }}">{{ related.title[:50] }}...</a>
+                                    <span class="related-post-date">{{ related.created_at.strftime('%d.%m.%Y') }}</span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="sidebar-widget">
+                <h3 class="widget-title"><i class="fas fa-share-alt"></i> Paylaş</h3>
+                <div class="share-buttons">
+                    <a href="https://twitter.com/intent/tweet?url={{ request.url }}&text={{ post.title }}" target="_blank" class="share-btn twitter">
+                        <i class="fab fa-twitter"></i> Twitter
+                    </a>
+                    <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.url }}" target="_blank" class="share-btn facebook">
+                        <i class="fab fa-facebook"></i> Facebook
+                    </a>
+                    <a href="https://www.linkedin.com/shareArticle?mini=true&url={{ request.url }}&title={{ post.title }}" target="_blank" class="share-btn linkedin">
+                        <i class="fab fa-linkedin"></i> LinkedIn
+                    </a>
+                    <a href="https://wa.me/?text={{ post.title }} {{ request.url }}" target="_blank" class="share-btn whatsapp">
+                        <i class="fab fa-whatsapp"></i> WhatsApp
+                    </a>
+                    <button onclick="copyLink()" class="share-btn copy-link">
+                        <i class="fas fa-link"></i> Linki Kopyala
+                    </button>
+                </div>
+            </div>
+        </aside>
+    </div>
+</div>
+
+<script>
+function toggleLike(postId) {
+    fetch(`/post/${postId}/like`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        const likeBtn = document.getElementById('like-btn');
+        const likeText = document.getElementById('like-text');
+        const likeCount = document.getElementById('like-count');
+        const likesCount = document.getElementById('likes-count');
+        
+        if (data.liked) {
+            likeBtn.classList.add('liked');
+            likeText.textContent = 'Beğenildi';
+        } else {
+            likeBtn.classList.remove('liked');
+            likeText.textContent = 'Beğen';
+        }
+        
+        likeCount.textContent = data.likes_count;
+        if (likesCount) {
+            likesCount.textContent = data.likes_count;
+        }
+    })
+    .catch(error => {
+        console.error('Hata:', error);
+        alert('Bir hata oluştu. Lütfen tekrar deneyin.');
+    });
+}
+
+function toggleBookmark(postId) {
+    fetch(`/post/${postId}/bookmark`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        const bookmarkBtn = document.getElementById('bookmark-btn');
+        const bookmarkText = document.getElementById('bookmark-text');
+        
+        if (data.bookmarked) {
+            bookmarkBtn.classList.add('bookmarked');
+            bookmarkText.textContent = 'Kaydedildi';
+        } else {
+            bookmarkBtn.classList.remove('bookmarked');
+            bookmarkText.textContent = 'Kaydet';
+        }
+    })
+    .catch(error => {
+        console.error('Hata:', error);
+    });
+}
+
+function toggleReplyForm(commentId) {
+    const replyForm = document.getElementById(`reply-form-${commentId}`);
+    if (replyForm.style.display === 'none') {
+        replyForm.style.display = 'block';
+    } else {
+        replyForm.style.display = 'none';
+    }
+}
+
+function copyLink() {
+    const url = window.location.href;
+    
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(url).then(function() {
+            alert('✅ Link kopyalandı!');
+        }).catch(function(err) {
+            fallbackCopyLink(url);
+        });
+    } else {
+        fallbackCopyLink(url);
+    }
+}
+
+function fallbackCopyLink(url) {
+    const textArea = document.createElement("textarea");
+    textArea.value = url;
+    textArea.style.position = "fixed";
+    textArea.style.left = "-999999px";
+    document.body.appendChild(textArea);
+    textArea.select();
+    try {
+        document.execCommand('copy');
+        alert('✅ Link kopyalandı!');
+    } catch (err) {
+        alert('❌ Link kopyalanamadı.');
+    }
+    document.body.removeChild(textArea);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Takip Edilenler - BlogHub{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1><i class="fas fa-users"></i> Takip Ettiğiniz Yazarlar</h1>
+        <p>Takip ettiğiniz yazarların en son yazıları</p>
+    </div>
+
+    {% if posts and posts.items %}
+        <div class="posts-grid">
+            {% for post in posts.items %}
+                <article class="post-card">
+                    {% if post.image %}
+                        <div class="post-image">
+                            <img src="{{ url_for('static', filename='uploads/' + post.image) }}" alt="{{ post.title }}">
+                            <div class="post-overlay">
+                                <a href="{{ url_for('posts.detail', id=post.id) }}" class="read-more-overlay">
+                                    <i class="fas fa-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="post-image post-no-image">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="post-content">
+                        <div class="post-meta">
+                            <span class="post-category">
+                                <i class="fas fa-tag"></i> {{ post.category or 'Genel' }}
+                            </span>
+                            <span class="post-date">
+                                <i class="far fa-calendar"></i> {{ post.created_at.strftime('%d.%m.%Y') }}
+                            </span>
+                        </div>
+                        
+                        <h2 class="post-title">
+                            <a href="{{ url_for('posts.detail', id=post.id) }}">{{ post.title }}</a>
+                        </h2>
+                        
+                        <p class="post-summary">
+                            {{ post.summary or post.content[:150] + '...' }}
+                        </p>
+                        
+                        <div class="post-footer">
+                            <div class="post-author">
+                                <i class="fas fa-user-circle"></i>
+                                <a href="{{ url_for('user.profile', username=post.author.username) }}">
+                                    {{ post.author.username }}
+                                </a>
+                            </div>
+                            <div class="post-stats">
+                                <span><i class="fas fa-clock"></i> {{ post.reading_time() }} dk</span>
+                                <span><i class="fas fa-heart"></i> {{ post.get_likes_count() }}</span>
+                                <span><i class="fas fa-eye"></i> {{ post.views }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+
+        {% if posts.pages > 1 %}
+            <div class="pagination">
+                {% if posts.has_prev %}
+                    <a href="?page={{ posts.prev_num }}" class="page-link">
+                        <i class="fas fa-chevron-left"></i> Önceki
+                    </a>
+                {% endif %}
+                
+                {% for page_num in posts.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                    {% if page_num %}
+                        <a href="?page={{ page_num }}" 
+                           class="page-link {% if page_num == posts.page %}active{% endif %}">
+                            {{ page_num }}
+                        </a>
+                    {% else %}
+                        <span class="page-ellipsis">...</span>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if posts.has_next %}
+                    <a href="?page={{ posts.next_num }}" class="page-link">
+                        Sonraki <i class="fas fa-chevron-right"></i>
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="empty-state">
+            <i class="fas fa-user-friends"></i>
+            <h2>Henüz Kimseyi Takip Etmiyorsunuz</h2>
+            <p>Sevdiğiniz yazarları takip edin, yazılarını kaçırmayın!</p>
+            <a href="{{ url_for('main.index') }}" class="btn btn-primary">
+                <i class="fas fa-search"></i> Yazarları Keşfet
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

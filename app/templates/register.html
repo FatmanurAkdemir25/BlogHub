@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Kayıt Ol - BlogHub{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <i class="fas fa-user-plus auth-icon"></i>
+                <h1>Hesap Oluşturun</h1>
+                <p>Hemen aramıza katılın</p>
+            </div>
+
+            <form action="{{ url_for('auth.register') }}" method="POST" class="auth-form">
+                <div class="form-group">
+                    <label for="username"><i class="fas fa-user"></i> Kullanıcı Adı</label>
+                    <input type="text" id="username" name="username" required autofocus>
+                </div>
+
+                <div class="form-group">
+                    <label for="email"><i class="fas fa-envelope"></i> E-posta</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password"><i class="fas fa-lock"></i> Şifre</label>
+                    <input type="password" id="password" name="password" required minlength="6">
+                    <small class="form-text">En az 6 karakter olmalıdır</small>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fas fa-user-plus"></i> Kayıt Ol
+                </button>
+            </form>
+
+            <div class="auth-footer">
+                <p>Zaten hesabınız var mı? <a href="{{ url_for('auth.login') }}">Giriş Yapın</a></p>
+            </div>
+        </div>
+
+        <div class="auth-illustration">
+            <i class="fas fa-pen-fancy"></i>
+            <h2>Yazma Tutkunuzu Keşfedin</h2>
+            <p>Kendi blog yazılarınızı oluşturun ve toplulukla etkileşime geçin</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

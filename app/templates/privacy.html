@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Gizlilik Politikası - BlogHub{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+    <div class="container">
+        <h1><i class="fas fa-shield-alt"></i> Gizlilik Politikası</h1>
+        <p>Son güncelleme: 13 Aralık 2024</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="content-page">
+        <section class="policy-section">
+            <h2>1. Genel Bakış</h2>
+            <p>
+                BlogHub olarak, kullanıcılarımızın gizliliğine önem veriyoruz. 
+                Bu gizlilik politikası, kişisel verilerinizin nasıl toplandığını, 
+                kullanıldığını ve korunduğunu açıklamaktadır.
+            </p>
+        </section>
+
+        <section class="policy-section">
+            <h2>2. Toplanan Bilgiler</h2>
+            <p>BlogHub'da kayıt olduğunuzda aşağıdaki bilgileri topluyoruz:</p>
+            <ul>
+                <li>Kullanıcı adı</li>
+                <li>E-posta adresi</li>
+                <li>Profil bilgileri (biyografi, profil fotoğrafı)</li>
+                <li>Oluşturduğunuz içerikler (yazılar, yorumlar)</li>
+                <li>Etkileşim verileri (beğeniler, takipler)</li>
+            </ul>
+        </section>
+
+        <section class="policy-section">
+            <h2>3. Bilgilerin Kullanımı</h2>
+            <p>Topladığımız bilgileri şu amaçlarla kullanıyoruz:</p>
+            <ul>
+                <li>Hesabınızı yönetmek ve kimlik doğrulaması yapmak</li>
+                <li>Platform hizmetlerini sağlamak</li>
+                <li>İçerik önerilerinde bulunmak</li>
+                <li>Platform güvenliğini sağlamak</li>
+                <li>Yasal yükümlülükleri yerine getirmek</li>
+            </ul>
+        </section>
+
+        <section class="policy-section">
+            <h2>4. Veri Güvenliği</h2>
+            <p>
+                Kişisel verilerinizi korumak için endüstri standardı güvenlik 
+                önlemlerini kullanıyoruz. Şifreleriniz şifrelenmiş olarak saklanır 
+                ve hiçbir şekilde düz metin olarak görüntülenemez.
+            </p>
+        </section>
+
+        <section class="policy-section">
+            <h2>5. Çerezler</h2>
+            <p>
+                Platform deneyiminizi iyileştirmek için çerezler kullanıyoruz. 
+                Çerezler, oturum yönetimi ve kullanıcı tercihlerini hatırlamak 
+                için kullanılır.
+            </p>
+        </section>
+
+        <section class="policy-section">
+            <h2>6. Üçüncü Taraf Paylaşımı</h2>
+            <p>
+                Kişisel bilgilerinizi üçüncü taraflarla paylaşmıyoruz. 
+                Ancak, yasal zorunluluklar veya platform güvenliği nedeniyle 
+                gerekli olması durumunda yetkili makamlarla paylaşılabilir.
+            </p>
+        </section>
+
+        <section class="policy-section">
+            <h2>7. Kullanıcı Hakları</h2>
+            <p>Kullanıcılarımız aşağıdaki haklara sahiptir:</p>
+            <ul>
+                <li>Kişisel verilerinize erişim</li>
+                <li>Verilerin düzeltilmesini talep etme</li>
+                <li>Verilerin silinmesini talep etme</li>
+                <li>Veri işlemeye itiraz etme</li>
+            </ul>
+        </section>
+
+        <section class="policy-section">
+            <h2>8. Çocukların Gizliliği</h2>
+            <p>
+                Platformumuz 13 yaş altı çocuklara yönelik değildir. 
+                13 yaş altı kullanıcılardan bilerek veri toplamıyoruz.
+            </p>
+        </section>
+
+        <section class="policy-section">
+            <h2>9. Politika Değişiklikleri</h2>
+            <p>
+                Bu gizlilik politikasını zaman zaman güncelleyebiliriz. 
+                Önemli değişiklikler olduğunda kullanıcılarımızı bilgilendireceğiz.
+            </p>
+        </section>
+
+        <section class="policy-section">
+            <h2>10. İletişim</h2>
+            <p>
+                Gizlilik politikamız hakkında sorularınız varsa, 
+                <a href="{{ url_for('main.contact') }}">iletişim sayfamızdan</a> bize ulaşabilirsiniz.
+            </p>
+        </section>
+    </div>
+</div>
+{% endblock %}

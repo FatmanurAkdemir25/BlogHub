@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}{{ user.username }} - Takip Edilenler{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1><i class="fas fa-user-friends"></i> {{ user.username }}'nin Takip Ettikleri</h1>
+        <p>{{ following|length }} kişi takip ediliyor</p>
+    </div>
+
+    {% if following %}
+        <div class="user-list">
+            {% for followed in following %}
+                <div class="user-card">
+                    <div class="user-card-avatar">
+                        {% if followed.avatar and followed.avatar != 'default-avatar.jpg' %}
+                            <img src="{{ url_for('static', filename='uploads/' + followed.avatar) }}" alt="{{ followed.username }}">
+                        {% else %}
+                            <i class="fas fa-user-circle"></i>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="user-card-info">
+                        <h3>
+                            <a href="{{ url_for('user.profile', username=followed.username) }}">{{ followed.username }}</a>
+                        </h3>
+                        {% if followed.bio %}
+                            <p class="user-card-bio">{{ followed.bio[:100] }}{{ '...' if followed.bio|length > 100 }}</p>
+                        {% endif %}
+                        <div class="user-card-stats">
+                            <span><i class="fas fa-file-alt"></i> {{ followed.posts|length }} yazı</span>
+                            <span><i class="fas fa-users"></i> {{ followed.get_followers_count() }} takipçi</span>
+                        </div>
+                    </div>
+                    
+                    <div class="user-card-actions">
+                        {% if current_user.is_authenticated and current_user.id != followed.id %}
+                            {% if current_user.is_following(followed) %}
+                                <a href="{{ url_for('user.profile', username=followed.username) }}" class="btn btn-secondary btn-sm">
+                                    <i class="fas fa-check"></i> Takip Ediliyor
+                                </a>
+                            {% else %}
+                                <a href="{{ url_for('user.profile', username=followed.username) }}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-user-plus"></i> Profili Gör
+                                </a>
+                            {% endif %}
+                        {% else %}
+                            <a href="{{ url_for('user.profile', username=followed.username) }}" class="btn btn-secondary btn-sm">
+                                <i class="fas fa-eye"></i> Profili Gör
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <i class="fas fa-user-slash"></i>
+            <h2>Kimse Takip Edilmiyor</h2>
+            <p>Bu kullanıcı henüz kimseyi takip etmiyor.</p>
+            <a href="{{ url_for('user.profile', username=user.username) }}" class="btn btn-primary">
+                <i class="fas fa-arrow-left"></i> Profile Dön
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

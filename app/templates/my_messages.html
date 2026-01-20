@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Mesajlarım - BlogHub{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1><i class="fas fa-envelope"></i> Mesajlarım</h1>
+        <p>Gönderdiğiniz mesajlar ve cevaplar</p>
+    </div>
+
+    <div class="my-messages-actions">
+        <a href="{{ url_for('main.contact') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Yeni Mesaj Gönder
+        </a>
+    </div>
+
+    {% if messages %}
+        <div class="user-messages-container">
+            {% for message in messages %}
+                <div class="user-message-card">
+                    <div class="user-message-header">
+                        <div>
+                            <h3>{{ message.subject }}</h3>
+                            <span class="message-date">{{ message.created_at.strftime('%d.%m.%Y %H:%M') }}</span>
+                        </div>
+                        <div>
+                            {% if message.status == 'pending' %}
+                                <span class="badge pending-badge"><i class="fas fa-clock"></i> Bekliyor</span>
+                            {% elif message.status == 'read' %}
+                                <span class="badge read-badge"><i class="fas fa-eye"></i> Okundu</span>
+                            {% elif message.status == 'replied' %}
+                                <span class="badge replied-badge"><i class="fas fa-check"></i> Cevaplandı</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="user-message-body">
+                        <h4><i class="fas fa-comment"></i> Gönderdiğiniz Mesaj:</h4>
+                        <p>{{ message.message }}</p>
+                    </div>
+
+                    {% if message.admin_reply %}
+                        <div class="admin-reply-box">
+                            <h4><i class="fas fa-reply"></i> Admin Cevabı:</h4>
+                            <p>{{ message.admin_reply }}</p>
+                            <small class="reply-date">
+                                <i class="far fa-clock"></i> {{ message.replied_at.strftime('%d.%m.%Y %H:%M') }}
+                            </small>
+                        </div>
+                    {% else %}
+                        <div class="waiting-reply">
+                            <i class="fas fa-hourglass-half"></i> Cevap bekleniyor...
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <h2>Henüz Mesaj Göndermediniz</h2>
+            <p>İletişim formunu kullanarak bize mesaj gönderebilirsiniz.</p>
+            <a href="{{ url_for('main.contact') }}" class="btn btn-primary">
+                <i class="fas fa-envelope"></i> Mesaj Gönder
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

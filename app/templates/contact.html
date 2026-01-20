@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}İletişim - BlogHub{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+    <div class="container">
+        <h1><i class="fas fa-envelope"></i> İletişim</h1>
+        <p>Bizimle iletişime geçin</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="contact-wrapper">
+        <div class="contact-info">
+            <h2><i class="fas fa-info-circle"></i> İletişim Bilgileri</h2>
+            <p>Sorularınız, önerileriniz veya şikayetleriniz için bize ulaşabilirsiniz.</p>
+            
+            <div class="contact-details">
+                <div class="contact-detail-item">
+                    <i class="fas fa-envelope"></i>
+                    <div>
+                        <strong>E-posta</strong>
+                        <p>info@bloghub.com</p>
+                    </div>
+                </div>
+                
+                <div class="contact-detail-item">
+                    <i class="fas fa-phone"></i>
+                    <div>
+                        <strong>Telefon</strong>
+                        <p>+90 (555) 123 45 67</p>
+                    </div>
+                </div>
+                
+                <div class="contact-detail-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <div>
+                        <strong>Adres</strong>
+                        <p>İstanbul, Türkiye</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="contact-social">
+                <h3>Sosyal Medya</h3>
+                <div class="social-links-contact">
+                    <a href="https://twitter.com" target="_blank"><i class="fab fa-twitter"></i> Twitter</a>
+                    <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook"></i> Facebook</a>
+                    <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i> Instagram</a>
+                    <a href="https://linkedin.com" target="_blank"><i class="fab fa-linkedin"></i> LinkedIn</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="contact-form-container">
+            <h2><i class="fas fa-paper-plane"></i> Mesaj Gönderin</h2>
+            <p class="contact-form-description">
+                Aşağıdaki formu doldurarak bize mesaj gönderebilirsiniz. 
+                Mesajınız admin ekibimize iletilecektir.
+            </p>
+
+            <form action="{{ url_for('main.contact') }}" method="POST" class="contact-form">
+                <div class="form-group">
+                    <label for="name"><i class="fas fa-user"></i> Adınız</label>
+                    <input type="text" id="name" name="name" required 
+                           value="{% if current_user.is_authenticated %}{{ current_user.username }}{% endif %}">
+                </div>
+
+                <div class="form-group">
+                    <label for="email"><i class="fas fa-envelope"></i> E-posta</label>
+                    <input type="email" id="email" name="email" required 
+                           value="{% if current_user.is_authenticated %}{{ current_user.email }}{% endif %}">
+                </div>
+
+                <div class="form-group">
+                    <label for="subject"><i class="fas fa-tag"></i> Konu</label>
+                    <select id="subject" name="subject" required>
+                        <option value="">Konu Seçin</option>
+                        <option value="Genel Soru">Genel Soru</option>
+                        <option value="Teknik Destek">Teknik Destek</option>
+                        <option value="Şikayet">Şikayet</option>
+                        <option value="Öneri">Öneri</option>
+                        <option value="İşbirliği">İşbirliği</option>
+                        <option value="Diğer">Diğer</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="message"><i class="fas fa-comment"></i> Mesajınız</label>
+                    <textarea id="message" name="message" rows="6" required 
+                              placeholder="Mesajınızı buraya yazın..."></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg btn-block">
+                    <i class="fas fa-paper-plane"></i> Mesajı Gönder
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

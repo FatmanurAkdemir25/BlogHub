@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Panel - BlogHub{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="admin-header">
+        <div>
+            <h1><i class="fas fa-crown"></i> Admin Kontrol Paneli</h1>
+            <p class="admin-subtitle">Site yönetim paneline hoş geldiniz, {{ current_user.username }}</p>
+        </div>
+    </div>
+
+    <div class="admin-stats">
+        <div class="stat-card">
+            <div class="stat-icon users">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ total_users }}</h3>
+                <p>Toplam Kullanıcı</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon posts">
+                <i class="fas fa-newspaper"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ total_posts }}</h3>
+                <p>Yayınlanmış Yazı</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon comments">
+                <i class="fas fa-comments"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ total_comments }}</h3>
+                <p>Toplam Yorum</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon drafts">
+                <i class="fas fa-file"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ total_drafts }}</h3>
+                <p>Taslak Yazı</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon likes">
+                <i class="fas fa-heart"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ total_likes }}</h3>
+                <p>Toplam Beğeni</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon follows">
+                <i class="fas fa-user-friends"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ total_follows }}</h3>
+                <p>Toplam Takip</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon messages">
+                <i class="fas fa-envelope"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ total_messages }}</h3>
+                <p>Gelen Mesaj</p>
+                {% if unread_messages > 0 %}
+                    <small style="color: #ef4444; font-weight: 600;">{{ unread_messages }} okunmamış</small>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="admin-quick-actions">
+        <h2><i class="fas fa-bolt"></i> Hızlı İşlemler</h2>
+        <div class="quick-actions-grid">
+            <a href="{{ url_for('admin.admin_users') }}" class="quick-action-card">
+                <i class="fas fa-users-cog"></i>
+                <h3>Kullanıcılar</h3>
+                <p>{{ total_users }} kullanıcı</p>
+            </a>
+            <a href="{{ url_for('admin.admin_posts') }}" class="quick-action-card">
+                <i class="fas fa-edit"></i>
+                <h3>Yazılar</h3>
+                <p>{{ total_posts }} yazı</p>
+            </a>
+            <a href="{{ url_for('admin.admin_comments') }}" class="quick-action-card">
+                <i class="fas fa-comment-dots"></i>
+                <h3>Yorumlar</h3>
+                <p>{{ total_comments }} yorum</p>
+            </a>
+            <a href="{{ url_for('admin.admin_messages') }}" class="quick-action-card {% if unread_messages > 0 %}has-notification{% endif %}">
+                <i class="fas fa-envelope"></i>
+                <h3>Mesajlar</h3>
+                <p>{{ total_messages }} mesaj</p>
+                {% if unread_messages > 0 %}
+                    <span class="notification-badge">{{ unread_messages }}</span>
+                {% endif %}
+            </a>
+        </div>
+    </div>
+
+    <div class="admin-content-grid">
+        <div class="admin-section">
+            <h2><i class="fas fa-user-plus"></i> Son Kullanıcılar</h2>
+            <div class="admin-list">
+                {% for user in recent_users %}
+                    <div class="admin-list-item">
+                        <div class="admin-list-avatar">
+                            {% if user.avatar and user.avatar != 'default-avatar.jpg' %}
+                                <img src="{{ url_for('static', filename='uploads/' + user.avatar) }}" alt="{{ user.username }}">
+                            {% else %}
+                                <i class="fas fa-user-circle"></i>
+                            {% endif %}
+                        </div>
+                        <div class="admin-list-info">
+                            <strong>{{ user.username }}</strong>
+                            <span>{{ user.email }}</span>
+                            <small>{{ user.created_at.strftime('%d.%m.%Y') }} • {{ user.posts|length }} yazı</small>
+                        </div>
+                        {% if user.is_admin %}
+                            <span class="badge admin-badge"><i class="fas fa-crown"></i> Admin</span>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+            <a href="{{ url_for('admin.admin_users') }}" class="admin-section-link">
+                Tümünü Gör <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+
+        <div class="admin-section">
+            <h2><i class="fas fa-newspaper"></i> Son Yazılar</h2>
+            <div class="admin-list">
+                {% for post in recent_posts %}
+                    <div class="admin-list-item">
+                        <div class="admin-list-info">
+                            <strong>
+                                <a href="{{ url_for('posts.detail', id=post.id) }}" target="_blank">
+                                    {{ post.title[:50] }}{{ '...' if post.title|length > 50 }}
+                                </a>
+                            </strong>
+                            <span>{{ post.author.username }}</span>
+                            <small>{{ post.created_at.strftime('%d.%m.%Y') }} • {{ post.views }} görüntülenme • {{ post.get_likes_count() }} beğeni</small>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            <a href="{{ url_for('admin.admin_posts') }}" class="admin-section-link">
+                Tümünü Gör <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+
+        <div class="admin-section">
+            <h2><i class="fas fa-fire"></i> En Popüler Yazılar</h2>
+            <div class="admin-list">
+                {% for post in popular_posts %}
+                    <div class="admin-list-item">
+                        <div class="admin-list-info">
+                            <strong>
+                                <a href="{{ url_for('posts.detail', id=post.id) }}" target="_blank">
+                                    {{ post.title[:50] }}{{ '...' if post.title|length > 50 }}
+                                </a>
+                            </strong>
+                            <span>{{ post.author.username }}</span>
+                            <small>{{ post.views }} görüntülenme • {{ post.get_likes_count() }} beğeni • {{ post.comments|length }} yorum</small>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="admin-section">
+            <h2><i class="fas fa-comment-alt"></i> Son Yorumlar</h2>
+            <div class="admin-list">
+                {% for comment in recent_comments %}
+                    <div class="admin-list-item">
+                        <div class="admin-list-avatar small">
+                            {% if comment.author.avatar and comment.author.avatar != 'default-avatar.jpg' %}
+                                <img src="{{ url_for('static', filename='uploads/' + comment.author.avatar) }}" alt="{{ comment.author.username }}">
+                            {% else %}
+                                <i class="fas fa-user-circle"></i>
+                            {% endif %}
+                        </div>
+                        <div class="admin-list-info">
+                            <strong>{{ comment.author.username }}</strong>
+                            <span>{{ comment.content[:60] }}{{ '...' if comment.content|length > 60 }}</span>
+                            <small>
+                                <a href="{{ url_for('posts.detail', id=comment.post_id) }}" target="_blank">
+                                    {{ comment.post.title[:40] }}{{ '...' if comment.post.title|length > 40 }}
+                                </a>
+                            </small>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            <a href="{{ url_for('admin.admin_comments') }}" class="admin-section-link">
+                Tümünü Gör <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+
+        <div class="admin-section">
+            <h2><i class="fas fa-envelope"></i> Son Mesajlar</h2>
+            <div class="admin-list">
+                {% for message in recent_messages %}
+                    <div class="admin-list-item">
+                        <div class="admin-list-info">
+                            <strong>{{ message.name }}</strong>
+                            <span>{{ message.subject }}</span>
+                            <small>{{ message.created_at.strftime('%d.%m.%Y') }} • {{ message.email }}</small>
+                        </div>
+                        {% if message.status == 'pending' %}
+                            <span class="badge pending-badge"><i class="fas fa-clock"></i></span>
+                        {% elif message.status == 'replied' %}
+                            <span class="badge replied-badge"><i class="fas fa-check"></i></span>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+            <a href="{{ url_for('admin.admin_messages') }}" class="admin-section-link">
+                Tümünü Gör <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

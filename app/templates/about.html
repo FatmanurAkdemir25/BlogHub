@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Hakkımızda - BlogHub{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+    <div class="container">
+        <h1><i class="fas fa-info-circle"></i> Hakkımızda</h1>
+        <p>BlogHub hikayesi ve vizyonumuz</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="content-page">
+        <section class="about-section">
+            <h2><i class="fas fa-feather-alt"></i> BlogHub Nedir?</h2>
+            <p>
+                BlogHub, düşüncelerinizi özgürce paylaşabileceğiniz, hikayelerinizi anlatabileceğiniz 
+                ve yaratıcılığınızı sergileyebileceğiniz modern bir blog platformudur. 2025 yılında 
+                kurulan platformumuz, yazma tutkusuna sahip herkese ücretsiz bir alan sunmayı hedeflemektedir.
+            </p>
+        </section>
+
+        <section class="about-section">
+            <h2><i class="fas fa-bullseye"></i> Misyonumuz</h2>
+            <p>
+                Herkesin sesini duyurabileceği, fikirlerini paylaşabileceği ve toplulukla etkileşime 
+                geçebileceği bir platform oluşturmak. Yazma özgürlüğünü desteklemek ve kaliteli içerik 
+                üreticilerini bir araya getirmek temel misyonumuzdur.
+            </p>
+        </section>
+
+        <section class="about-section">
+            <h2><i class="fas fa-rocket"></i> Vizyonumuz</h2>
+            <p>
+                Türkiye'nin en büyük içerik üretici topluluğunu oluşturmak ve yazarların sesini 
+                dünyaya duyurmak için en iyi platformu sağlamak. Kullanıcı dostu arayüzü ve güçlü 
+                özellikleriyle BlogHub, gelecekte blog yazarlığının adresi olmayı hedeflemektedir.
+            </p>
+        </section>
+
+        <section class="about-section">
+            <h2><i class="fas fa-star"></i> Özelliklerimiz</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <i class="fas fa-pen-fancy"></i>
+                    <h3>Kolay Yazma</h3>
+                    <p>Markdown desteği ile kolay ve hızlı yazı oluşturun</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-users"></i>
+                    <h3>Topluluk</h3>
+                    <p>Yazarları takip edin, yorumlar yapın ve etkileşime geçin</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>İstatistikler</h3>
+                    <p>Yazılarınızın performansını takip edin</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-mobile-alt"></i>
+                    <h3>Mobil Uyumlu</h3>
+                    <p>Her cihazdan erişilebilir modern tasarım</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="about-section cta-section">
+            <h2><i class="fas fa-hand-point-right"></i> Hemen Katılın!</h2>
+            <p>BlogHub topluluğuna katılın ve yazmaya başlayın.</p>
+            {% if not current_user.is_authenticated %}
+                <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-user-plus"></i> Ücretsiz Kayıt Ol
+                </a>
+            {% else %}
+                <a href="{{ url_for('posts.create') }}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-plus-circle"></i> Yazı Oluştur
+                </a>
+            {% endif %}
+        </section>
+    </div>
+</div>
+{% endblock %}

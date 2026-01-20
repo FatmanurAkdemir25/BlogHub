@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}{{ user.username }} - Profil{% endblock %}
+
+{% block content %}
+<div class="profile-header">
+    <div class="container">
+        <div class="profile-info">
+            <div class="profile-avatar">
+                {% if user.avatar and user.avatar != 'default-avatar.jpg' %}
+                    <img src="{{ url_for('static', filename='uploads/' + user.avatar) }}" alt="{{ user.username }}" class="profile-avatar-img">
+                {% else %}
+                    <i class="fas fa-user-circle"></i>
+                {% endif %}
+            </div>
+            <div class="profile-details">
+                <h1>{{ user.username }}</h1>
+                <p class="profile-email"><i class="fas fa-envelope"></i> {{ user.email }}</p>
+                <p class="profile-joined"><i class="fas fa-calendar"></i> Katılma: {{ user.created_at.strftime('%B %Y') }}</p>
+                {% if user.bio %}
+                    <p class="profile-bio">{{ user.bio }}</p>
+                {% else %}
+                    <p class="profile-bio-empty"><i class="fas fa-info-circle"></i> Henüz biyografi eklenmemiş</p>
+                {% endif %}
+                {% if current_user.is_authenticated and current_user.id == user.id %}
+                    <a href="{{ url_for('user.edit_profile', username=user.username) }}" class="btn btn-edit-profile">
+                        <i class="fas fa-edit"></i> Profili Düzenle
+                    </a>
+                {% elif current_user.is_authenticated %}
+                    <button onclick="toggleFollow('{{ user.username }}')" id="follow-btn" class="btn-follow {% if current_user.is_following(user) %}following{% endif %}">
+                        <i class="fas fa-user-plus"></i>
+                        <span id="follow-text">{{ 'Takip Ediliyor' if current_user.is_following(user) else 'Takip Et' }}</span>
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+        <div class="profile-stats">
+            <div class="stat-item">
+                <span class="stat-number">{{ posts|length }}</span>
+                <span class="stat-label">Yazı</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">{{ user.comments|length }}</span>
+                <span class="stat-label">Yorum</span>
+            </div>
+            <a href="{{ url_for('user.followers', username=user.username) }}" class="stat-item stat-clickable">
+                <span class="stat-number" id="followers-count">{{ user.get_followers_count() }}</span>
+                <span class="stat-label">Takipçi</span>
+            </a>
+            <a href="{{ url_for('user.following_posts', username=user.username) }}" class="stat-item stat-clickable">
+                <span class="stat-number">{{ user.get_following_count() }}</span>
+                <span class="stat-label">Takip</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <h2 class="section-title"><i class="fas fa-newspaper"></i> Yazılar</h2>
+    
+    {% if posts %}
+        <div class="posts-grid">
+            {% for post in posts %}
+                <article class="post-card">
+                    {% if post.image %}
+                        <div class="post-image">
+                            <img src="{{ url_for('static', filename='uploads/' + post.image) }}" alt="{{ post.title }}">
+                            <div class="post-overlay">
+                                <a href="{{ url_for('posts.detail', id=post.id) }}" class="read-more-overlay">
+                                    <i class="fas fa-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="post-image post-no-image">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="post-content">
+                        <div class="post-meta">
+                            <span class="post-category">
+                                <i class="fas fa-tag"></i> {{ post.category or 'Genel' }}
+                            </span>
+                            <span class="post-date">
+                                <i class="far fa-calendar"></i> {{ post.created_at.strftime('%d.%m.%Y') }}
+                            </span>
+                        </div>
+                        
+                        <h2 class="post-title">
+                            <a href="{{ url_for('posts.detail', id=post.id) }}">{{ post.title }}</a>
+                        </h2>
+                        
+                        <p class="post-summary">
+                            {{ post.summary or post.content[:150] + '...' }}
+                        </p>
+                        
+                        <div class="post-footer">
+                            <div class="post-stats">
+                                <span><i class="fas fa-eye"></i> {{ post.views }}</span>
+                                <span><i class="fas fa-comment"></i> {{ post.comments|length }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="no-posts">
+            <i class="fas fa-inbox"></i>
+            <h3>Henüz yazı yok</h3>
+            <p>Bu kullanıcı henüz yazı paylaşmamış.</p>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+function toggleFollow(username) {
+    fetch(`/follow/${username}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        const followBtn = document.getElementById('follow-btn');
+        const followText = document.getElementById('follow-text');
+        const followersCount = document.getElementById('followers-count');
+        
+        if (data.following) {
+            followBtn.classList.add('following');
+            followText.textContent = 'Takip Ediliyor';
+        } else {
+            followBtn.classList.remove('following');
+            followText.textContent = 'Takip Et';
+        }
+        
+        followersCount.textContent = data.followers_count;
+    })
+    .catch(error => {
+        console.error('Hata:', error);
+    });
+}
+</script>
+{% endblock %}

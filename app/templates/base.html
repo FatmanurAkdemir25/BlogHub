@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Blog Sitesi{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    <style>
+        /* Modern Bildirim Badge Stilleri */
+        .notification-link {
+            position: relative;
+            display: inline-flex !important;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -8px;
+            right: -10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 7px;
+            border-radius: 12px;
+            min-width: 20px;
+            height: 20px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            border: 2px solid white;
+            transition: all 0.3s ease;
+            z-index: 10;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        .notification-badge[style*="inline-flex"] {
+            display: inline-flex !important;
+        }
+
+        .notification-badge::after {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 12px;
+            background: inherit;
+            filter: blur(8px);
+            opacity: 0.5;
+            z-index: -1;
+        }
+
+        .notification-link:hover .notification-badge {
+            transform: scale(1.15) rotate(-5deg);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .notification-badge.many {
+            padding: 3px 6px;
+            font-size: 10px;
+            min-width: 24px;
+        }
+
+        @keyframes popIn {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .notification-badge.new {
+            animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.9;
+                transform: scale(1.05);
+            }
+        }
+
+        .notification-badge.pulse {
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <i class="fas fa-feather-alt"></i>
+                <a href="{{ url_for('main.index') }}">BlogHub</a>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="{{ url_for('main.index') }}"><i class="fas fa-home"></i> Ana Sayfa</a></li>
+                {% if current_user.is_authenticated %}
+                    {% if current_user.is_admin %}
+                        <li><a href="{{ url_for('admin.admin_dashboard') }}" class="admin-link"><i class="fas fa-crown"></i> Admin</a></li>
+                    {% endif %}
+                    <li><a href="{{ url_for('user.following_posts') }}"><i class="fas fa-users"></i> Takip</a></li>
+                    <li><a href="{{ url_for('user.bookmarks') }}"><i class="fas fa-bookmark"></i> Kaydedilenler</a></li>
+                    <li><a href="{{ url_for('user.notifications') }}" class="notification-link">
+                        <i class="fas fa-bell"></i> Bildirimler
+                        <span id="notification-badge" class="notification-badge"></span>
+                    </a></li>
+                    <!-- Sadece normal kullanıcılar için Mesajlarım -->
+                    {% if not current_user.is_admin %}
+                        <li><a href="{{ url_for('user.my_messages') }}"><i class="fas fa-envelope"></i> Mesajlarım</a></li>
+                    {% endif %}
+                    <li><a href="{{ url_for('posts.create') }}"><i class="fas fa-plus-circle"></i> Yeni Yazı</a></li>
+                    <li><a href="{{ url_for('user.drafts') }}"><i class="fas fa-file"></i> Taslaklar</a></li>
+                    <li><a href="{{ url_for('user.profile', username=current_user.username) }}"><i class="fas fa-user"></i> Profil</a></li>
+                    <li><a href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt"></i> Çıkış</a></li>
+                {% else %}
+                    <li><a href="{{ url_for('auth.login') }}"><i class="fas fa-sign-in-alt"></i> Giriş</a></li>
+                    <li><a href="{{ url_for('auth.register') }}" class="btn-primary"><i class="fas fa-user-plus"></i> Kayıt Ol</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                        <button class="close-alert">&times;</button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3><i class="fas fa-feather-alt"></i> BlogHub</h3>
+                    <p>Düşüncelerinizi paylaşın, hikayelerinizi anlatın. BlogHub ile yazma tutkunuzu keşfedin.</p>
+                    <div class="social-links">
+                        <a href="https://twitter.com" target="_blank" title="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="https://facebook.com" target="_blank" title="Facebook"><i class="fab fa-facebook"></i></a>
+                        <a href="https://instagram.com" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="https://linkedin.com" target="_blank" title="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>Hızlı Linkler</h4>
+                    <ul>
+                        <li><a href="{{ url_for('main.index') }}">Ana Sayfa</a></li>
+                        <li><a href="{{ url_for('main.about') }}">Hakkımızda</a></li>
+                        <li><a href="{{ url_for('main.contact') }}">İletişim</a></li>
+                        <li><a href="{{ url_for('main.privacy') }}">Gizlilik Politikası</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Kategoriler</h4>
+                    <ul>
+                        <li><a href="{{ url_for('main.index', category='Teknoloji') }}">Teknoloji</a></li>
+                        <li><a href="{{ url_for('main.index', category='Yaşam') }}">Yaşam</a></li>
+                        <li><a href="{{ url_for('main.index', category='Seyahat') }}">Seyahat</a></li>
+                        <li><a href="{{ url_for('main.index', category='Yemek') }}">Yemek</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 BlogHub. Tüm hakları saklıdır.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    
+    {% if current_user.is_authenticated %}
+    <script>
+        // Bildirim sayısını güncelle
+        function updateNotificationCount() {
+            fetch('{{ url_for("user.unread_notifications_count") }}')
+                .then(response => response.json())
+                .then(data => {
+                    const badge = document.getElementById('notification-badge');
+                    const count = data.count;
+                    const previousCount = parseInt(badge.dataset.previousCount || '0');
+                    
+                    if (count > 0) {
+                        // 99'dan fazlaysa "99+" göster
+                        badge.textContent = count > 99 ? '99+' : count;
+                        badge.style.display = 'inline-flex';
+                        
+                        // 99'dan fazlaysa özel class ekle
+                        if (count > 99) {
+                            badge.classList.add('many');
+                        } else {
+                            badge.classList.remove('many');
+                        }
+                        
+                        // Yeni bildirim geldiğinde animasyon
+                        if (count > previousCount) {
+                            badge.classList.remove('new', 'pulse');
+                            setTimeout(() => {
+                                badge.classList.add('new');
+                                setTimeout(() => {
+                                    badge.classList.remove('new');
+                                    badge.classList.add('pulse');
+                                }, 500);
+                            }, 10);
+                        } else {
+                            badge.classList.add('pulse');
+                        }
+                        
+                        badge.dataset.previousCount = count;
+                    } else {
+                        badge.style.display = 'none';
+                        badge.classList.remove('many', 'new', 'pulse');
+                        badge.dataset.previousCount = '0';
+                    }
+                })
+                .catch(error => {
+                    console.error('Bildirim hatası:', error);
+                });
+        }
+        
+        // Sayfa yüklendiğinde
+        document.addEventListener('DOMContentLoaded', function() {
+            updateNotificationCount();
+            
+            // Her 30 saniyede bir güncelle
+            setInterval(updateNotificationCount, 30000);
+        });
+        
+        // Bildirimler sayfasından çıkıldığında hemen güncelle
+        if (document.referrer.includes('/notifications')) {
+            setTimeout(updateNotificationCount, 500);
+        }
+    </script>
+    {% endif %}
+</body>
+</html>

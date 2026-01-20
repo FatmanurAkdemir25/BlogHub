@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Taslaklar - BlogHub{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1><i class="fas fa-file"></i> Taslaklar</h1>
+        <p>Henüz yayınlanmamış yazılarınız</p>
+    </div>
+
+    {% if drafts %}
+        <div class="drafts-list">
+            {% for draft in drafts %}
+                <div class="draft-card">
+                    {% if draft.image %}
+                        <img src="{{ url_for('static', filename='uploads/' + draft.image) }}" alt="{{ draft.title }}" class="draft-thumbnail">
+                    {% else %}
+                        <div class="draft-thumbnail draft-no-image">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="draft-info">
+                        <h3>{{ draft.title }}</h3>
+                        <p class="draft-summary">{{ draft.summary or draft.content[:100] + '...' }}</p>
+                        <div class="draft-meta">
+                            <span><i class="fas fa-tag"></i> {{ draft.category or 'Kategori Yok' }}</span>
+                            <span><i class="far fa-clock"></i> {{ draft.updated_at.strftime('%d.%m.%Y %H:%M') }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="draft-actions">
+                        <a href="{{ url_for('posts.edit', id=draft.id) }}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-edit"></i> Düzenle
+                        </a>
+                        <form action="{{ url_for('posts.delete', id=draft.id) }}" method="POST" style="display: inline;" 
+                              onsubmit="return confirm('Bu taslağı silmek istediğinize emin misiniz?');">
+                            <button type="submit" class="btn btn-danger btn-sm">
+                                <i class="fas fa-trash"></i> Sil
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <i class="fas fa-file"></i>
+            <h2>Henüz Taslak Yok</h2>
+            <p>Yazılarınızı taslak olarak kaydedebilir, daha sonra yayınlayabilirsiniz.</p>
+            <a href="{{ url_for('posts.create') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Yeni Yazı Oluştur
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Giriş Yap - BlogHub{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <i class="fas fa-sign-in-alt auth-icon"></i>
+                <h1>Hoş Geldiniz</h1>
+                <p>Hesabınıza giriş yapın</p>
+            </div>
+
+            <form action="{{ url_for('auth.login') }}" method="POST" class="auth-form">
+                <div class="form-group">
+                    <label for="username"><i class="fas fa-user"></i> Kullanıcı Adı</label>
+                    <input type="text" id="username" name="username" required autofocus>
+                </div>
+
+                <div class="form-group">
+                    <label for="password"><i class="fas fa-lock"></i> Şifre</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fas fa-sign-in-alt"></i> Giriş Yap
+                </button>
+            </form>
+
+            <div class="auth-footer">
+                <p>Henüz hesabınız yok mu? <a href="{{ url_for('auth.register') }}">Kayıt Olun</a></p>
+            </div>
+        </div>
+
+        <div class="auth-illustration">
+            <i class="fas fa-book-reader"></i>
+            <h2>Hikayelerinizi Paylaşın</h2>
+            <p>Binlerce okuyucuya ulaşın ve düşüncelerinizi özgürce ifade edin</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

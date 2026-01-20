@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Kaydedilenler - BlogHub{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1><i class="fas fa-bookmark"></i> Kaydedilenler</h1>
+        <p>Daha sonra okumak için kaydettiğiniz yazılar</p>
+    </div>
+
+    {% if posts %}
+        <div class="posts-grid">
+            {% for post in posts %}
+                <article class="post-card">
+                    {% if post.image %}
+                        <div class="post-image">
+                            <img src="{{ url_for('static', filename='uploads/' + post.image) }}" alt="{{ post.title }}">
+                            <div class="post-overlay">
+                                <a href="{{ url_for('posts.detail', id=post.id) }}" class="read-more-overlay">
+                                    <i class="fas fa-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="post-image post-no-image">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="post-content">
+                        <div class="post-meta">
+                            <span class="post-category">
+                                <i class="fas fa-tag"></i> {{ post.category or 'Genel' }}
+                            </span>
+                            <span class="post-date">
+                                <i class="far fa-calendar"></i> {{ post.created_at.strftime('%d.%m.%Y') }}
+                            </span>
+                        </div>
+                        
+                        <h2 class="post-title">
+                            <a href="{{ url_for('posts.detail', id=post.id) }}">{{ post.title }}</a>
+                        </h2>
+                        
+                        <p class="post-summary">
+                            {{ post.summary or post.content[:150] + '...' }}
+                        </p>
+                        
+                        <div class="post-footer">
+                            <div class="post-author">
+                                <i class="fas fa-user-circle"></i>
+                                <a href="{{ url_for('user.profile', username=post.author.username) }}">
+                                    {{ post.author.username }}
+                                </a>
+                            </div>
+                            <div class="post-stats">
+                                <span><i class="fas fa-clock"></i> {{ post.reading_time() }} dk</span>
+                                <span><i class="fas fa-heart"></i> {{ post.get_likes_count() }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <i class="fas fa-bookmark"></i>
+            <h2>Henüz Kayıtlı Yazı Yok</h2>
+            <p>Beğendiğiniz yazıları kaydedin, daha sonra okuyun!</p>
+            <a href="{{ url_for('main.index') }}" class="btn btn-primary">
+                <i class="fas fa-search"></i> Yazı Keşfet
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
