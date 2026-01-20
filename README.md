@@ -84,8 +84,8 @@ Modern, güvenli ve ölçeklenebilir bir blog platformu. Flask framework'ü kull
 
 ### Adım 1: Projeyi Klonlayın
 ```bash
-git clone https://github.com/FatmanurAkdemir25/bloghub.git
-cd bloghub
+git clone https://github.com/FatmanurAkdemir25/BlogHub.git
+cd BlogHub
 ```
 
 ### Adım 2: Virtual Environment Oluşturun
